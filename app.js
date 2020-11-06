@@ -8,12 +8,12 @@ host: "localhost",
 port: 3000,
 user: "root",
 password:"",
-database: "employees_DB"
+database: "employees_db"
 });
 
 connection.connect(function(err){
     if (err) throw err;
-    //!Welcome msg to present with ASCII intro. Not to repeat on mainMunu func
+    //!Welcome msg to present with ASCII intro. Not to repeat on mainMenu func
     // welcomeMessage();
     mainMenu();
 });
@@ -69,5 +69,29 @@ function mainMenu() {
 }
 
 function addDept() {
+    console.log("Success!");
+}
 
+function addRole() {
+    console.log("Success!");
+}
+
+function addEmp() {
+    console.log("Success!");
+}
+
+function viewDept() {
+    console.log("Success!");
+}
+
+function viewRole() {
+    console.log("Success!");
+}
+
+function viewEmp() {
+    console.log("Success!");
+}
+
+function updateRole() {
+    console.log("Success!");
 }
