@@ -18,12 +18,12 @@ const connection = mysql.createConnection({
 connection.connect(function (err) {
   if (err) throw err;
   //!Welcome msg to present with ASCII intro. Not to repeat on mainMenu func
-  // welcomeMessage();
+  welcomeMessage();
   mainMenu();
 });
 
 function welcomeMessage() {
-  //!Welcome msg to present with ASCII intro. Not to repeat on mainMenu func
+  console.log("                               Employee Tracker");
 }
 
 function mainMenu() {
@@ -45,6 +45,7 @@ function mainMenu() {
           "View Role",
           "View Employee",
           "Update Employee Role",
+          "Exit Application",
           new inquirer.Separator(),
         ],
       },
@@ -72,6 +73,8 @@ function mainMenu() {
         case "Update Employee Role":
           updateRole();
           break;
+        case "Exit Application":
+          connection.end();
       }
     });
 }
@@ -87,6 +90,7 @@ function addDept() {
     ])
     .then(function (answer) {
       const deptName = answer.newDept;
+
       connection.query(
         "INSERT INTO department SET ?",
         {
@@ -94,10 +98,10 @@ function addDept() {
         },
         function (err, res) {
           if (err) throw err;
+          console.log(deptName + " department successfully entered!\n");
           mainMenu();
         }
       );
-      console.log(deptName + "department successfully entered!\n");
     });
 }
 
@@ -110,7 +114,7 @@ function addRole() {
         name: "newRole",
       },
       {
-        message: "Please enter role's department: ",
+        message: "Please enter role's department ID#: ",
         type: "input",
         name: "deptId",
       },
@@ -187,7 +191,7 @@ function addEmp() {
         empNameFirst +
           " " +
           empNameLast +
-          "successfully entered with role id# " +
+          " successfully entered with role id# " +
           empRole +
           " and manager id# " +
           empMgr +
@@ -218,24 +222,6 @@ function viewEmp() {
     if (err) throw err;
     mainMenu();
   });
-  connection.query();
-}
-
-function setRoster() {
-  // const query = "SELECT concat (employee.first_name, ' ', employee.last_name) AS employee_full_name FROM employee ;";
-  const query =
-    "SELECT CONCAT (first_name, ' ', last_name) AS full_name FROM employee;";
-
-  connection.query(query, (err, res) => {
-    if (err) throw err;
-
-    for (let i = 0; i < res.length; i++) {
-      roster.push(res[i].full_name);
-    }
-
-    console.log(roster);
-    return roster;
-  });
 }
 
 function updateRole() {
@@ -245,7 +231,7 @@ function updateRole() {
   let roles = [];
   let dataObj = {};
   let newRoleId = 0;
-  let  chosenEmpId = 0; 
+  let chosenEmpId = 0;
 
   const query =
     "SELECT  role.id, title, CONCAT (first_name, ' ', last_name) AS full_name FROM role, employee WHERE role.id = employee.role_id";
@@ -298,10 +284,12 @@ function updateRole() {
           }
         }
 
-
         const updateQuery = "UPDATE employee SET role_id = ? WHERE id = ?";
-        connection.query(updateQuery, [newRoleId, chosenEmpId], function(err, res){
-          if(err) throw err;
+        connection.query(updateQuery, [newRoleId, chosenEmpId], function (
+          err,
+          res
+        ) {
+          if (err) throw err;
           console.log(res);
         });
 
@@ -310,4 +298,5 @@ function updateRole() {
         console.table(dataObj);
       });
   });
+  mainMenu();
 }
