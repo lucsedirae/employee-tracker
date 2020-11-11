@@ -1,6 +1,7 @@
 //*Depencies
 const mysql = require("mysql");
 const inquirer = require("inquirer");
+const { up } = require("inquirer/lib/utils/readline");
 
 //*Creates MySQL connection
 const connection = mysql.createConnection({
@@ -243,12 +244,15 @@ function updateRole() {
   let roleIds = [];
   let roles = [];
   let dataObj = {};
+  let newRoleId = 0;
+  let  chosenEmpId = 0; 
 
-  const query = "SELECT  role.id, title, CONCAT (first_name, ' ', last_name) AS full_name FROM role, employee WHERE role.id = employee.role_id";
+  const query =
+    "SELECT  role.id, title, CONCAT (first_name, ' ', last_name) AS full_name FROM role, employee WHERE role.id = employee.role_id";
 
   connection.query(query, function (err, res) {
     if (err) throw err;
-    
+
     dataObj = res;
     // console.log(dataObj);
 
@@ -261,46 +265,49 @@ function updateRole() {
     // console.log({roles});
     // console.log({roster});
     inquirer
-    .prompt([
-      {
-        name: "employee",
-        type: "list",
-        message: "Which employee would you like to update?",
-        choices: roster,
-      },
-      {
-        name: "role",
-        type: "list",
-        message: "Which role would you like to assign to employee?",
-        choices: roles,
-      },
-    ]).then(function(answer){
-      const newRole = answer.role;
-      const chosenEmployee = answer.employee;
+      .prompt([
+        {
+          name: "employee",
+          type: "list",
+          message: "Which employee would you like to update?",
+          choices: roster,
+        },
+        {
+          name: "role",
+          type: "list",
+          message: "Which role would you like to assign to employee?",
+          choices: roles,
+        },
+      ])
+      .then(function (answer) {
+        const newRole = answer.role;
+        const chosenEmployee = answer.employee;
 
-      console.log(newRole);
-      console.log(chosenEmployee);
-      for(let i = 0; i < roster.length; i++) {
+        console.log(newRole);
+        console.log(chosenEmployee);
+        for (let i = 0; i < roster.length; i++) {
+          if (chosenEmployee === dataObj[i].full_name) {
+            console.log(dataObj[i].full_name + " will be updated to: ");
 
-        if(chosenEmployee === dataObj[i].full_name) {
-          console.log(dataObj[i].full_name + " will be updated to: ");
-          for(let j = 0; j < roleIds.length; j++) {
-            if (newRole === dataObj[j].title) {
-              dataObj[i].new_id = roleIds[j];
+            for (let j = 0; j < roleIds.length; j++) {
+              if (newRole === dataObj[j].title) {
+                newRoleId = roleIds[j];
+                chosenEmpId = j + 1;
+              }
             }
           }
         }
-      }
-
-      const updateQuery = "";
-      connection.query
-
-      console.log("Success@ ");
-      console.table(dataObj);
 
 
-      
-    });
+        const updateQuery = "UPDATE employee SET role_id = ? WHERE id = ?";
+        connection.query(updateQuery, [newRoleId, chosenEmpId], function(err, res){
+          if(err) throw err;
+          console.log(res);
+        });
 
+        console.log("Role ID " + newRoleId);
+        console.log("Success@ ");
+        console.table(dataObj);
+      });
   });
 }
